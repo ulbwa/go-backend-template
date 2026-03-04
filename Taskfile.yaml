@@ -2,12 +2,10 @@ version: "3"
 
 vars:
   GO_VERSION: "1.25"
-  GOLANGCI_LINT_VERSION: "v2.8.0"
-  GCI_VERSION: "v0.13.7"
-  GOFUMPT_VERSION: "v0.9.2"
 
   BIN_DIR: "{{.ROOT_DIR}}/bin"
   GOLANGCI_LINT: "{{.BIN_DIR}}/golangci-lint"
+  GOVULNCHECK: "{{.BIN_DIR}}/govulncheck"
   GCI: "{{.BIN_DIR}}/gci"
   GOFUMPT: "{{.BIN_DIR}}/gofumpt"
 
@@ -16,13 +14,15 @@ tasks:
     desc: Install formatters gci and gofumpt into {{.BIN_DIR}}
     cmds:
       - |
-        [ -f {{.GCI}} ] || {
-          echo "[install-formatters] installing gci {{.GCI_VERSION}}"
-          GOBIN="{{.BIN_DIR}}" go install github.com/daixiang0/gci@{{.GCI_VERSION}}
+        [ -x {{.GCI}} ] || {
+          echo "[install-formatters] installing gci from go.mod tools"
+          mkdir -p "{{.BIN_DIR}}"
+          GOBIN="{{.BIN_DIR}}" go install github.com/daixiang0/gci
         }
-        [ -f {{.GOFUMPT}} ] || {
-          echo "[install-formatters] installing gofumpt {{.GOFUMPT_VERSION}}"
-          GOBIN="{{.BIN_DIR}}" go install mvdan.cc/gofumpt@{{.GOFUMPT_VERSION}}
+        [ -x {{.GOFUMPT}} ] || {
+          echo "[install-formatters] installing gofumpt from go.mod tools"
+          mkdir -p "{{.BIN_DIR}}"
+          GOBIN="{{.BIN_DIR}}" go install mvdan.cc/gofumpt
         }
     status:
       - test -x "{{.GCI}}"
@@ -43,10 +43,10 @@ tasks:
     desc: Install golangci-lint into {{.BIN_DIR}}
     cmds:
       - |
-        [ -f {{.GOLANGCI_LINT}} ] || {
-          mkdir -p {{.BIN_DIR}}
-          echo "[install-golangci-lint] installing golangci-lint {{.GOLANGCI_LINT_VERSION}}"
-          GOBIN="{{.BIN_DIR}}" go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@{{.GOLANGCI_LINT_VERSION}}
+        [ -x {{.GOLANGCI_LINT}} ] || {
+          mkdir -p "{{.BIN_DIR}}"
+          echo "[install-golangci-lint] installing golangci-lint from go.mod tools"
+          GOBIN="{{.BIN_DIR}}" go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint
           echo "[install-golangci-lint] installed: {{.GOLANGCI_LINT}}"
         }
     status:
@@ -59,3 +59,24 @@ tasks:
       - |
         echo "[lint] running golangci-lint"
         {{.GOLANGCI_LINT}} run ./... --config .golangci.yml
+
+  install-govulncheck:
+    desc: Install govulncheck into {{.BIN_DIR}}
+    cmds:
+      - |
+        [ -x {{.GOVULNCHECK}} ] || {
+          mkdir -p "{{.BIN_DIR}}"
+          echo "[install-govulncheck] installing govulncheck from go.mod tools"
+          GOBIN="{{.BIN_DIR}}" go install golang.org/x/vuln/cmd/govulncheck
+          echo "[install-govulncheck] installed: {{.GOVULNCHECK}}"
+        }
+    status:
+      - test -x "{{.GOVULNCHECK}}"
+
+  vuln:
+    desc: Run govulncheck using local binary from {{.BIN_DIR}}
+    deps: [install-govulncheck]
+    cmds:
+      - |
+        echo "[vuln] running govulncheck"
+        {{.GOVULNCHECK}} ./...
