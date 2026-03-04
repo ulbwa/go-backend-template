@@ -1,0 +1,61 @@
+version: "3"
+
+vars:
+  GO_VERSION: "1.25"
+  GOLANGCI_LINT_VERSION: "v2.8.0"
+  GCI_VERSION: "v0.13.7"
+  GOFUMPT_VERSION: "v0.9.2"
+
+  BIN_DIR: "{{.ROOT_DIR}}/bin"
+  GOLANGCI_LINT: "{{.BIN_DIR}}/golangci-lint"
+  GCI: "{{.BIN_DIR}}/gci"
+  GOFUMPT: "{{.BIN_DIR}}/gofumpt"
+
+tasks:
+  install-formatters:
+    desc: Install formatters gci and gofumpt into {{.BIN_DIR}}
+    cmds:
+      - |
+        [ -f {{.GCI}} ] || {
+          echo "[install-formatters] installing gci {{.GCI_VERSION}}"
+          GOBIN="{{.BIN_DIR}}" go install github.com/daixiang0/gci@{{.GCI_VERSION}}
+        }
+        [ -f {{.GOFUMPT}} ] || {
+          echo "[install-formatters] installing gofumpt {{.GOFUMPT_VERSION}}"
+          GOBIN="{{.BIN_DIR}}" go install mvdan.cc/gofumpt@{{.GOFUMPT_VERSION}}
+        }
+    status:
+      - test -x "{{.GCI}}"
+      - test -x "{{.GOFUMPT}}"
+
+  format:
+    desc: Run formatters gci and gofumpt using local binaries from {{.BIN_DIR}}
+    deps: [install-formatters]
+    cmds:
+      - |
+        echo "[format] running gofumpt"
+        find . -type f -name '*.go' -exec {{.GOFUMPT}} -extra -w {} +
+      - |
+        echo "[format] running gci"
+        find . -type f -name '*.go' -exec {{.GCI}} write -s standard -s default -s localmodule {} +
+
+  install-golangci-lint:
+    desc: Install golangci-lint into {{.BIN_DIR}}
+    cmds:
+      - |
+        [ -f {{.GOLANGCI_LINT}} ] || {
+          mkdir -p {{.BIN_DIR}}
+          echo "[install-golangci-lint] installing golangci-lint {{.GOLANGCI_LINT_VERSION}}"
+          GOBIN="{{.BIN_DIR}}" go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@{{.GOLANGCI_LINT_VERSION}}
+          echo "[install-golangci-lint] installed: {{.GOLANGCI_LINT}}"
+        }
+    status:
+      - test -x "{{.GOLANGCI_LINT}}"
+
+  lint:
+    desc: Run golangci-lint using local binary from {{.BIN_DIR}}
+    deps: [install-golangci-lint]
+    cmds:
+      - |
+        echo "[lint] running golangci-lint"
+        {{.GOLANGCI_LINT}} run ./... --config .golangci.yml
