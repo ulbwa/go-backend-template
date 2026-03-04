@@ -1,4 +1,3 @@
-# yaml-language-server: $schema=https://json.schemastore.org/golangci-lint.json
 version: "2"
 
 run:
@@ -28,29 +27,56 @@ linters:
     - staticcheck
     - govet
     - gocritic
-    - gosec
-    - ineffassign
-    - misspell
     - revive
-    - unconvert
+    - unused
+    - gosec
+    - bodyclose
+    - asciicheck
+    - cyclop
+    - dupl
+    - ineffassign
     - unparam
-    - whitespace
+    - errorlint
+    - errname
+    - contextcheck
+    - containedctx
+  disable:
+    - gocyclo
+    - lll
+
   exclusions:
     generated: strict
-    presets:
-      - comments
-      - common-false-positives
     rules:
       - path: _test\.go
         linters:
-          - errcheck
+          - cyclop
+          - dupl
+          - gosec
+
+  settings:
+    gosec:
+      config:
+        global:
+          audit: true
+          show-ignored: true
+        severity: "medium"
+        confidence: "medium"
+
+    cyclop:
+      max-complexity: 20
+
+    revive:
+      severity: warning
 
 formatters:
   enable:
-    - gofmt
-    - goimports
+    - gofumpt
+    - gci
   settings:
-    gofmt:
-      simplify: true
-  exclusions:
-    generated: strict
+    gofumpt:
+      extra-rules: true
+    gci:
+      sections:
+        - Standard
+        - Default
+      no-inline-comments: false
