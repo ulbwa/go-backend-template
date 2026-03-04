@@ -1,0 +1,56 @@
+# yaml-language-server: $schema=https://json.schemastore.org/golangci-lint.json
+version: "2"
+
+run:
+  timeout: 5m
+  relative-path-mode: gomod
+  issues-exit-code: 1
+  tests: true
+  modules-download-mode: readonly
+  allow-parallel-runners: true
+
+output:
+  formats:
+    text:
+      print-linter-name: true
+      print-issued-lines: true
+      colors: true
+
+issues:
+  max-issues-per-linter: 0
+  max-same-issues: 0
+  uniq-by-line: true
+
+linters:
+  default: standard
+  enable:
+    - errcheck
+    - staticcheck
+    - govet
+    - gocritic
+    - gosec
+    - ineffassign
+    - misspell
+    - revive
+    - unconvert
+    - unparam
+    - whitespace
+  exclusions:
+    generated: strict
+    presets:
+      - comments
+      - common-false-positives
+    rules:
+      - path: _test\.go
+        linters:
+          - errcheck
+
+formatters:
+  enable:
+    - gofmt
+    - goimports
+  settings:
+    gofmt:
+      simplify: true
+  exclusions:
+    generated: strict
