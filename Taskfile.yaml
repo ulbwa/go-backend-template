@@ -1,11 +1,10 @@
 version: "3"
 
 vars:
-  GO_VERSION: "1.25"
-
   BIN_DIR: "{{.ROOT_DIR}}/bin"
   GOLANGCI_LINT: "{{.BIN_DIR}}/golangci-lint"
   GOVULNCHECK: "{{.BIN_DIR}}/govulncheck"
+  GO_ENUM: "{{.BIN_DIR}}/go-enum"
   GCI: "{{.BIN_DIR}}/gci"
   GOFUMPT: "{{.BIN_DIR}}/gofumpt"
 
@@ -80,3 +79,24 @@ tasks:
       - |
         echo "[vuln] running govulncheck"
         {{.GOVULNCHECK}} ./...
+
+  install-go-enum:
+    desc: Install go-enum into {{.BIN_DIR}}
+    cmds:
+      - |
+        [ -x {{.GO_ENUM}} ] || {
+          mkdir -p "{{.BIN_DIR}}"
+          echo "[install-go-enum] installing go-enum from go.mod tools"
+          GOBIN="{{.BIN_DIR}}" go install github.com/abice/go-enum
+          echo "[install-go-enum] installed: {{.GO_ENUM}}"
+        }
+    status:
+      - test -x "{{.GO_ENUM}}"
+
+  generate:
+    desc: Run code generation
+    deps: [install-go-enum]
+    cmds:
+      - |
+        echo "[generate] running go generate ./..."
+        PATH="{{.BIN_DIR}}:$PATH" go generate ./...
