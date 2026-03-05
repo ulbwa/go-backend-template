@@ -28,6 +28,7 @@ var defaultConfig = Config{
 var configValidator = validator.New()
 
 func Read(path string) (*Config, error) {
+	//nolint:gosec // G304: configuration path is explicit runtime input (CLI/entrypoint).
 	data, err := os.ReadFile(path)
 	if err != nil {
 		return nil, err

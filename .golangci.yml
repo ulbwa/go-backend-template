@@ -79,4 +79,5 @@ formatters:
       sections:
         - Standard
         - Default
+        - LocalModule
       no-inline-comments: false

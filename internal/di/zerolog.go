@@ -105,7 +105,7 @@ func createFileWriter(cfg config.FileLogConfig) io.Writer {
 	// Ensure log directory exists
 	dir := filepath.Dir(cfg.Path)
 	if dir != "" && dir != "." {
-		if err := os.MkdirAll(dir, 0o755); err != nil {
+		if err := os.MkdirAll(dir, 0o750); err != nil {
 			return os.Stderr
 		}
 	}
@@ -136,7 +136,7 @@ func createFileWriter(cfg config.FileLogConfig) io.Writer {
 	}
 
 	// Simple file without rotation
-	file, err := os.OpenFile(cfg.Path, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0o644)
+	file, err := os.OpenFile(cfg.Path, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0o600)
 	if err != nil {
 		// Fallback to stderr on error
 		return os.Stderr
