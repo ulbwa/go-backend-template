@@ -111,6 +111,26 @@ make run
 make clean
 ```
 
+## PR CI (GitHub Actions)
+
+Pull request workflow is defined in `.github/workflows/pr.yml`.
+
+It runs on PR events:
+
+- `opened`
+- `synchronize`
+- `reopened`
+- `ready_for_review`
+
+Checks executed for non-draft PRs:
+
+- `lint` -> `task lint`
+- `test` -> `task test`
+- `quality` ->
+	- `task format` + `git diff --exit-code` (no formatting drift)
+	- `task generate` + `git diff --exit-code` (generated files are up to date)
+- `security` -> `task vuln` (`govulncheck`)
+
 ## Release CI (GitHub Actions)
 
 Release workflow is defined in `.github/workflows/release.yml` and starts only on tag push.
