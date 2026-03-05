@@ -54,13 +54,13 @@ type RotateConfig struct {
 	Enabled bool `yaml:"enabled"`
 
 	// Maximum file size in megabytes.
-	MaxSize *int `yaml:"max_size" validate:"required_if=Enabled true,gte=1"`
+	MaxSize *int `yaml:"max_size" validate:"required_if=Enabled true,omitnil,gte=1"`
 
 	// Maximum file age in days.
-	MaxAge *int `yaml:"max_age" validate:"required_if=Enabled true,gte=1"`
+	MaxAge *int `yaml:"max_age" validate:"required_if=Enabled true,omitnil,gte=1"`
 
 	// Maximum number of old log files to keep.
-	MaxBackups *int `yaml:"max_backups" validate:"required_if=Enabled true,gte=0"`
+	MaxBackups *int `yaml:"max_backups" validate:"required_if=Enabled true,omitnil,gte=0"`
 
 	// Compress old log files.
 	Compress bool `yaml:"compress"`
