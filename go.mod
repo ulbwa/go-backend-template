@@ -1,6 +1,6 @@
 module github.com/ulbwa/go-backend-template
 
-go 1.25.0
+go 1.26.0
 
 tool (
 	github.com/abice/go-enum
