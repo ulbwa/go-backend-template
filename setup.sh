@@ -114,3 +114,10 @@ done
 
 echo
 echo "Done. Updated ${#target_files[@]} file(s)."
+
+script_path="${BASH_SOURCE[0]}"
+if rm -- "$script_path"; then
+  echo "Removed script: $script_path"
+else
+  echo "Warning: failed to remove script: $script_path" >&2
+fi

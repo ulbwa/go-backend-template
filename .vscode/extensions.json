@@ -2,6 +2,7 @@
     "recommendations": [
         "codezombiech.gitignore",
         "golang.go",
-        "redhat.vscode-yaml"
+        "redhat.vscode-yaml",
+        "mikestead.dotenv"
     ]
 }
