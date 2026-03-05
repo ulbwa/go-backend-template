@@ -111,6 +111,33 @@ make run
 make clean
 ```
 
+## Release CI (GitHub Actions)
+
+Release workflow is defined in `.github/workflows/release.yml` and starts only on tag push.
+
+Supported tag patterns:
+
+- `v*.*.*` (stable), for example: `v1.2.3`
+- `v*.*.*-alpha.*`, for example: `v1.2.3-alpha.1`
+- `v*.*.*-beta.*`, for example: `v1.2.3-beta.1`
+- `v*.*.*-rc.*`, for example: `v1.2.3-rc.1`
+
+Important behavior:
+
+- Tags can point to commits from any branch (no `main`-only restriction).
+- Any tag containing `-` is treated as prerelease.
+- Stable tags additionally publish Docker tag `latest`.
+- Workflow builds and pushes:
+	- multi-arch Docker image (`linux/amd64`, `linux/arm64`) to `ghcr.io/<owner>/<repo>`
+	- compiled binaries from `dist/*` to GitHub Release
+
+How to cut a release:
+
+```bash
+git tag v0.0.1-beta.1
+git push origin v0.0.1-beta.1
+```
+
 ## Database Migrations
 
 Set `DATABASE_URL` in Go DSN format before running migration commands.
