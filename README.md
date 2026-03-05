@@ -89,6 +89,11 @@ Important note:
 - Missing environment variables are expanded to an empty string by `os.ExpandEnv`.
 - Any critical settings should be validated as required in config validation tags.
 
+Logging in this template uses `zerolog`.
+
+- Documentation: https://github.com/rs/zerolog
+- Commented logging configuration example: `config.yaml`
+
 ## Development Commands
 
 Quality and tooling commands are defined in `Taskfile.yaml`.
