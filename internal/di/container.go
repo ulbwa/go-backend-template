@@ -2,6 +2,7 @@ package di
 
 import (
 	"github.com/samber/do/v2"
+
 	"github.com/ulbwa/go-backend-template/internal/config"
 )
 

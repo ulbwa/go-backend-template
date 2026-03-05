@@ -7,6 +7,7 @@ import (
 
 	"github.com/rs/zerolog"
 	"github.com/samber/do/v2"
+
 	"github.com/ulbwa/go-backend-template/internal/config"
 	"github.com/ulbwa/go-backend-template/internal/di"
 )

@@ -9,8 +9,9 @@ import (
 
 	"github.com/rs/zerolog"
 	"github.com/samber/do/v2"
-	"github.com/ulbwa/go-backend-template/internal/config"
 	"gopkg.in/natefinch/lumberjack.v2"
+
+	"github.com/ulbwa/go-backend-template/internal/config"
 )
 
 func provideZerolog(injector do.Injector) {
@@ -135,7 +136,7 @@ func createFileWriter(cfg config.FileLogConfig) io.Writer {
 	}
 
 	// Simple file without rotation
-	file, err := os.OpenFile(cfg.Path, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
+	file, err := os.OpenFile(cfg.Path, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0o644)
 	if err != nil {
 		// Fallback to stderr on error
 		return os.Stderr
