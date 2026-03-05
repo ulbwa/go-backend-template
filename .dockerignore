@@ -17,3 +17,7 @@ README.md
 Taskfile.yaml
 Makefile
 agents.md
+
+config.yaml
+logs/
+drafts/

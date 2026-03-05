@@ -44,3 +44,5 @@ logs/
 *.log
 *.pid
 *.pid.lock
+
+drafts/
