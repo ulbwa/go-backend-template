@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - main
+    tags:
+      - "*"
 
 permissions:
   contents: read
@@ -23,13 +25,7 @@ jobs:
       - name: Derive release variables
         id: vars
         run: |
-          git fetch --tags --force
-          version="$(git tag --points-at "$GITHUB_SHA" | head -n1)"
-
-          if [[ -z "$version" ]]; then
-            echo "No tag found for commit $GITHUB_SHA"
-            exit 1
-          fi
+          version="${GITHUB_REF_NAME}"
 
           is_prerelease="false"
 
