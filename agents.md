@@ -383,10 +383,36 @@ A change is complete only if all items are satisfied:
 4. For DB changes, migrations are verified both ways: `migration-up` and `migration-down`.
 5. No secrets are exposed or committed.
 6. Documentation is updated (`README.md`/`docs/`) when contracts, startup flow, or architectural rules change.
+7. Changes are committed as focused commits that include **ONLY** files related to the implemented task.
 
 ---
 
-## 13) Migration Quality Rules
+## 13) Commit and Description Conventions
+
+1. Use Conventional Commits format:
+   - `<type>(<scope>): <summary>`
+   - examples: `feat(auth): add refresh token rotation`, `fix(repo): handle nil filter`.
+2. Allowed commit types: `feat`, `fix`, `docs`, `refactor`, `test`, `chore`, `build`, `ci`, `perf`.
+3. Commit summary rules:
+   - imperative mood (`add`, `fix`, `update`),
+   - lower-case first word,
+   - no trailing period,
+   - concise (prefer <= 72 chars).
+4. Scope should match the affected module/layer (for example: `config`, `handler`, `repository`, `db`, `docs`).
+5. If a commit body is used, describe:
+   - what changed,
+   - why it changed,
+   - any migration/backward-compatibility impact.
+6. PR/MR title should follow the same commit naming convention.
+7. PR/MR description should include:
+   - objective and scope,
+   - architectural impact (if any),
+   - test evidence (`task test`, `task lint`, etc.),
+   - migration notes (`up/down`) when DB is changed.
+
+---
+
+## 14) Migration Quality Rules
 
 1. Migration names must be short, domain-meaningful, `snake_case`, and contain no spaces.
 2. Every migration must include both `-- migrate:up` and `-- migrate:down`.
@@ -397,7 +423,7 @@ A change is complete only if all items are satisfied:
 
 ---
 
-## 14) Config and Secrets Rules
+## 15) Config and Secrets Rules
 
 1. **NEVER COMMIT SECRETS** (passwords, tokens, private keys, DSNs with credentials).
 2. Keep local secrets in environment variables and/or `.env` (when ignored by `.gitignore`).
@@ -409,7 +435,7 @@ A change is complete only if all items are satisfied:
 
 ---
 
-## 15) AI Change Boundaries
+## 16) AI Change Boundaries
 
 1. AI must operate strictly within the explicit user task scope.
 2. **DO NOT** change public API contracts, DB schema semantics, or architecture rules without explicit request.
