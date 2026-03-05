@@ -92,6 +92,7 @@ Important note:
 ## Development Commands
 
 Quality and tooling commands are defined in `Taskfile.yaml`.
+The same `task` commands are also used in CI pipelines to keep local and CI checks consistent.
 
 ```bash
 task format       # gofumpt + gci
