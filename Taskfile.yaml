@@ -7,6 +7,7 @@ vars:
   GO_ENUM: "{{.BIN_DIR}}/go-enum"
   GCI: "{{.BIN_DIR}}/gci"
   GOFUMPT: "{{.BIN_DIR}}/gofumpt"
+  DBMATE: "{{.BIN_DIR}}/dbmate"
 
 tasks:
   install-formatters:
@@ -100,3 +101,40 @@ tasks:
       - |
         echo "[generate] running go generate ./..."
         PATH="{{.BIN_DIR}}:$PATH" go generate ./...
+
+  install-dbmate:
+    desc: Install dbmate into {{.BIN_DIR}}
+    cmds:
+      - |
+        [ -x {{.DBMATE}} ] || {
+          mkdir -p "{{.BIN_DIR}}"
+          echo "[install-dbmate] installing dbmate from go.mod tools"
+          GOBIN="{{.BIN_DIR}}" go install github.com/amacneil/dbmate/v2
+          echo "[install-dbmate] installed: {{.DBMATE}}"
+        }
+    status:
+      - test -x "{{.DBMATE}}"
+
+  migration-new:
+    desc: Create new migration (task migration-new -- <name>)
+    deps: [install-dbmate]
+    cmds:
+      - |
+        echo "[migration-new] running dbmate new {{.CLI_ARGS}}"
+        {{.DBMATE}} new {{.CLI_ARGS}}
+
+  migration-up:
+    desc: Run migrations up
+    deps: [install-dbmate]
+    cmds:
+      - |
+        echo "[migration-up] running dbmate up"
+        {{.DBMATE}} up
+
+  migration-down:
+    desc: Run migrations down
+    deps: [install-dbmate]
+    cmds:
+      - |
+        echo "[migration-down] running dbmate down"
+        {{.DBMATE}} down
