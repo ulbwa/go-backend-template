@@ -107,6 +107,28 @@ task vuln         # govulncheck
 task generate     # go generate ./...
 ```
 
+## Pre-commit Hooks
+
+Hooks include:
+
+- `pre-commit`: YAML check, trailing whitespace, EOF fix, private key detection, `task format`, `task lint`
+- `pre-push`: `task test`, `task vuln`
+
+Setup:
+
+```bash
+# install pre-commit via your package manager
+pre-commit install
+pre-commit install --hook-type pre-push
+```
+
+Run manually:
+
+```bash
+pre-commit run --all-files
+pre-commit run --all-files --hook-stage pre-push
+```
+
 Build and run commands are in `Makefile`.
 
 ```bash
