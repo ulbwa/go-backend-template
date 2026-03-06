@@ -37,7 +37,7 @@ updates:
       docker-minor-patch:
         update-types:
           - "minor"
-          - "patch" 
+          - "patch"
       docker-major:
         update-types:
           - "major"
