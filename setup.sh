@@ -62,7 +62,7 @@ while IFS= read -r -d '' file; do
 done < <(find . -type f -name '*.go' ! -path './vendor/*' -print0 | sort -z)
 
 declare -a target_files=()
-declare -A counts=()
+declare -a counts=()
 total_matches=0
 
 for file in "${files[@]}"; do
@@ -70,7 +70,7 @@ for file in "${files[@]}"; do
   match_count=$(grep -F -c "$OLD_MODULE" "$file" || true)
   if (( match_count > 0 )); then
     target_files+=("$file")
-    counts["$file"]=$match_count
+    counts+=("$match_count")
     (( total_matches += match_count ))
   fi
 done
@@ -85,15 +85,15 @@ echo "Dry-run preview (no files changed):"
 echo "  from: $OLD_MODULE"
 echo "  to:   $NEW_MODULE"
 echo
-for file in "${target_files[@]}"; do
-  echo "  - $file (${counts[$file]} matches)"
+for i in "${!target_files[@]}"; do
+  echo "  - ${target_files[$i]} (${counts[$i]} matches)"
 done
 echo
 echo "Total replacements: $total_matches"
 
 read -r -p "Apply these changes? [y/N]: " confirm
-case "${confirm,,}" in
-  y|yes)
+case "$confirm" in
+  [yY]|[yY][eE][sS])
     ;;
   *)
     echo "Aborted. No files were changed."
