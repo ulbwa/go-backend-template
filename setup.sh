@@ -107,8 +107,8 @@ escaped_new=$(printf '%s' "$NEW_MODULE" | sed -e 's/[\/&|]/\\&/g')
 for file in "${target_files[@]}"; do
   tmp_file=$(mktemp)
   sed "s|$escaped_old|$escaped_new|g" "$file" > "$tmp_file"
-  chmod --reference="$file" "$tmp_file" || true
-  mv "$tmp_file" "$file"
+  cat "$tmp_file" > "$file"
+  rm -f "$tmp_file"
   echo "Updated: $file"
 done
 
