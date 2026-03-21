@@ -53,10 +53,10 @@ tasks:
     cmds:
       - |
         echo "[format] running gofumpt"
-        find . -type f -name '*.go' -exec {{.GOFUMPT}} -extra -w {} +
+        find . -type f -name '*.go' -not -path './pkg/pb/*' -exec {{.GOFUMPT}} -extra -w {} +
       - |
         echo "[format] running gci"
-        find . -type f -name '*.go' -exec {{.GCI}} write -s standard -s default -s localmodule {} +
+        find . -type f -name '*.go' -not -path './pkg/pb/*' -exec {{.GCI}} write -s standard -s default -s localmodule {} +
       - |
         if find proto -name '*.proto' 2>/dev/null | grep -q .; then
           echo "[format] running buf format"
