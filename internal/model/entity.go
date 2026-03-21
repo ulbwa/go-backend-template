@@ -8,7 +8,7 @@ import (
 
 // globalSeq is a process-wide monotonic counter used to preserve the original
 // recording order of domain events across multiple aggregates. Each call to
-// RecordEvent claims the next value atomically, so events from different
+// recordEvent claims the next value atomically, so events from different
 // entities can be sorted by outbox.Event.Sequence even after their slices are
 // merged by the EventDispatcher.
 var globalSeq atomic.Uint64
@@ -30,20 +30,20 @@ var globalSeq atomic.Uint64
 //	        return ErrAlreadyCancelled
 //	    }
 //	    o.status = OrderStatusCancelled
-//	    o.RecordEvent(OrderCancelledEvent{ID: o.id})
+//	    o.recordEvent(OrderCancelledEvent{ID: o.id})
 //	    return nil
 //	}
 type Entity struct {
 	events []outbox.Event
 }
 
-// RecordEvent appends a domain event to the entity's pending event list and
+// recordEvent appends a domain event to the entity's pending event list and
 // stamps it with a globally unique sequence number. The sequence is assigned
 // atomically, so events recorded across multiple aggregates within the same
 // use-case can later be sorted into their original recording order.
 //
 // Call this from within domain methods after a successful state transition.
-func (e *Entity) RecordEvent(payload any) {
+func (e *Entity) recordEvent(payload any) {
 	e.events = append(e.events, outbox.Event{
 		Sequence: globalSeq.Add(1),
 		Payload:  payload,
