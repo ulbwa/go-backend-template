@@ -46,6 +46,10 @@ linters:
 
   exclusions:
     generated: strict
+    paths:
+      - drafts/
+      - pkg/pb/
+      - ".*_enum\\.go"
     rules:
       - path: _test\.go
         linters:
@@ -55,7 +59,7 @@ linters:
       - path: internal/model/entity\.go
         linters:
           - unused
-        text: recordEvent
+        text: "recordEvent|globalSeq"
 
   settings:
     gosec:

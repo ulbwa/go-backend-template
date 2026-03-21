@@ -16,10 +16,10 @@ Template for Go backends using:
 - Keep persistence concerns in `internal/repository` with explicit storage-to-domain/query mapping.
 - Keep external vendor contracts inside `internal/integration` adapters only.
 - Keep dependencies flowing downward only:
-	- `cmd -> handler -> service -> model`
-	- `service -> repository` (via ports/interfaces)
-	- `service -> integration` (via ports/interfaces)
-	- `handler -> read_repository` is allowed for CQRS-lite reads
+  - `cmd -> handler -> service -> model`
+  - `service -> repository` (via ports/interfaces)
+  - `service -> integration` (via ports/interfaces)
+  - `handler -> read_repository` is allowed for CQRS-lite reads
 
 ## Project Layout
 
@@ -29,6 +29,11 @@ Template for Go backends using:
 |- db/
 |  |- migrations/           # SQL migrations
 |  `- schema.sql            # schema snapshot/base schema
+|- proto/                   # Protocol Buffer sources (gRPC contracts)
+|  `- buf.yaml              # buf lint/breaking-change config
+|- buf.gen.yaml             # buf code generation config
+|- pkg/
+|  `- pb/                   # generated gRPC stubs (build artifact, do not edit)
 |- internal/
 |  |- config/               # config model, load, validation
 |  |- di/                   # dependency injection container
@@ -39,15 +44,15 @@ Template for Go backends using:
 |  |- repository/           # storage implementations
 |  `- service/              # use-case orchestration
 |- logs/                    # runtime logs (local/dev)
-|- Taskfile.yaml            # format/lint/test/migration tasks
+|- Taskfile.yaml            # format/lint/test/generate/migration tasks
 `- Makefile                 # build/run helpers
 ```
 
 ## Prerequisites
 
 - Development is supported on Unix-like systems only (Linux, macOS, BSD).
-- Go `1.25.0` (see `go.mod`)
-- `task` CLI (https://taskfile.dev)
+- Go `1.26.1` (see `go.mod`)
+- `task` CLI (<https://taskfile.dev>)
 - `make`
 
 ## Quick Start
@@ -91,7 +96,7 @@ Important note:
 
 Logging in this template uses `zerolog`.
 
-- Documentation: https://github.com/rs/zerolog
+- Documentation: <https://github.com/rs/zerolog>
 - Commented logging configuration example: `config.yaml`
 
 ## Development Commands
@@ -100,11 +105,11 @@ Quality and tooling commands are defined in `Taskfile.yaml`.
 The same `task` commands are also used in CI pipelines to keep local and CI checks consistent.
 
 ```bash
-task format       # gofumpt + gci
-task lint         # golangci-lint
+task format       # gofumpt + gci (Go files); buf format (proto files)
+task lint         # golangci-lint (Go files); buf lint (proto files)
 task test         # go test ./...
 task vuln         # govulncheck
-task generate     # go generate ./...
+task generate     # go generate ./... (Go); buf generate (proto → pkg/pb/)
 ```
 
 ## Pre-commit Hooks
@@ -154,8 +159,8 @@ Checks executed for non-draft PRs:
 - `lint` -> `task lint`
 - `test` -> `task test`
 - `quality` ->
-	- `task format` + `git diff --exit-code` (no formatting drift)
-	- `task generate` + `git diff --exit-code` (generated files are up to date)
+  - `task format` + `git diff --exit-code` (no formatting drift)
+  - `task generate` + `git diff --exit-code` (generated files are up to date)
 - `security` -> `task vuln` (`govulncheck`)
 
 ## Release CI (GitHub Actions)
@@ -175,8 +180,8 @@ Important behavior:
 - Any tag containing `-` is treated as prerelease.
 - Stable tags additionally publish Docker tag `latest`.
 - Workflow builds and pushes:
-	- multi-arch Docker image (`linux/amd64`, `linux/arm64`) to `ghcr.io/<owner>/<repo>`
-	- compiled binaries from `dist/*` to GitHub Release
+  - multi-arch Docker image (`linux/amd64`, `linux/arm64`) to `ghcr.io/<owner>/<repo>`
+  - compiled binaries from `dist/*` to GitHub Release
 
 How to cut a release:
 
@@ -208,6 +213,26 @@ Migration quality requirements:
 - Each migration must include both `-- migrate:up` and `-- migrate:down`.
 - `down` must be meaningfully reversible.
 - Validate apply and rollback before merge.
+
+## gRPC Codegen
+
+The project includes a pre-configured gRPC toolchain based on [buf](https://buf.build). No system-level `protoc` installation is required — all tools are installed into `bin/` via `go install`.
+
+**Workflow:**
+
+1. Add a `.proto` file under `proto/<service>/v1/`.
+2. Run `task generate` — Go stubs are written to `pkg/pb/<service>/v1/`.
+3. Implement the generated `<Service>Server` interface in `internal/handler/<service>/grpc/`.
+
+```bash
+task generate   # installs buf if needed (when .proto files exist), then runs buf generate
+task lint       # also lints proto files via buf lint
+task format     # also formats proto files via buf format
+```
+
+Generated files under `pkg/pb/` are gitignored build artifacts. Never edit them directly.
+
+If the project does not use gRPC, the `proto/` directory and `buf.gen.yaml` can be ignored entirely — nothing is wired into the server by default.
 
 ## Module Rename Helper
 
