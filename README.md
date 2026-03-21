@@ -51,7 +51,7 @@ Template for Go backends using:
 ## Prerequisites
 
 - Development is supported on Unix-like systems only (Linux, macOS, BSD).
-- Go `1.25.0` (see `go.mod`)
+- Go `1.26.1` (see `go.mod`)
 - `task` CLI (<https://taskfile.dev>)
 - `make`
 

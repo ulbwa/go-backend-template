@@ -9,7 +9,7 @@
 
     // buf binary path — used by bufbuild.vscode-buf (lint/format integration)
     // and drblury.protobuf-vsc (proto language server).
-    // Install via: task install-buf
+    // Installed automatically on first proto file addition (via task generate or task install-buf).
     "buf.binaryPath": "${workspaceFolder}/bin/buf",
     "protobuf.linter.buf.binaryPath": "${workspaceFolder}/bin/buf"
 }
