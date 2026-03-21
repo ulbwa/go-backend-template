@@ -46,3 +46,7 @@ logs/
 *.pid.lock
 
 drafts/
+
+# Generated proto stubs — regenerate with: task generate
+# The directory itself is tracked via pkg/pb/.gitkeep
+pkg/pb/**/*.go
