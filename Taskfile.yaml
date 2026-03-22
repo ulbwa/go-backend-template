@@ -10,6 +10,23 @@ vars:
   DBMATE: "{{.BIN_DIR}}/dbmate"
 
 tasks:
+  install-dependencies:
+    desc: Download all Go module dependencies (go mod download)
+    cmds:
+      - |
+        echo "[install-dependencies] running go mod download"
+        go mod download
+
+  install:
+    desc: Install all development tools into {{.BIN_DIR}} and download module dependencies
+    deps:
+      - install-dependencies
+      - install-formatters
+      - install-golangci-lint
+      - install-govulncheck
+      - install-go-enum
+      - install-dbmate
+
   install-formatters:
     desc: Install formatters gci and gofumpt into {{.BIN_DIR}}
     cmds:
@@ -54,7 +71,7 @@ tasks:
 
   lint:
     desc: Run golangci-lint using local binary from {{.BIN_DIR}}
-    deps: [install-golangci-lint]
+    deps: [install-dependencies, install-golangci-lint]
     cmds:
       - |
         echo "[lint] running golangci-lint"
@@ -82,7 +99,7 @@ tasks:
 
   vuln:
     desc: Run govulncheck using local binary from {{.BIN_DIR}}
-    deps: [install-govulncheck]
+    deps: [install-dependencies, install-govulncheck]
     cmds:
       - |
         echo "[vuln] running govulncheck"
