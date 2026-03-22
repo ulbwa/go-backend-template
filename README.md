@@ -29,11 +29,6 @@ Template for Go backends using:
 |- db/
 |  |- migrations/           # SQL migrations
 |  `- schema.sql            # schema snapshot/base schema
-|- proto/                   # Protocol Buffer sources (gRPC contracts)
-|  `- buf.yaml              # buf lint/breaking-change config
-|- buf.gen.yaml             # buf code generation config
-|- pkg/
-|  `- pb/                   # generated gRPC stubs (build artifact, do not edit)
 |- internal/
 |  |- config/               # config model, load, validation
 |  |- di/                   # dependency injection container
@@ -105,11 +100,11 @@ Quality and tooling commands are defined in `Taskfile.yaml`.
 The same `task` commands are also used in CI pipelines to keep local and CI checks consistent.
 
 ```bash
-task format       # gofumpt + gci (Go files); buf format (proto files)
-task lint         # golangci-lint (Go files); buf lint (proto files)
+task format       # gofumpt + gci (Go files)
+task lint         # golangci-lint
 task test         # go test ./...
 task vuln         # govulncheck
-task generate     # go generate ./... (Go); buf generate (proto → pkg/pb/)
+task generate     # go generate ./...
 ```
 
 ## Pre-commit Hooks
@@ -213,26 +208,6 @@ Migration quality requirements:
 - Each migration must include both `-- migrate:up` and `-- migrate:down`.
 - `down` must be meaningfully reversible.
 - Validate apply and rollback before merge.
-
-## gRPC Codegen
-
-The project includes a pre-configured gRPC toolchain based on [buf](https://buf.build). No system-level `protoc` installation is required — all tools are installed into `bin/` via `go install`.
-
-**Workflow:**
-
-1. Add a `.proto` file under `proto/<service>/v1/`.
-2. Run `task generate` — Go stubs are written to `pkg/pb/<service>/v1/`.
-3. Implement the generated `<Service>Server` interface in `internal/handler/<service>/grpc/`.
-
-```bash
-task generate   # installs buf if needed (when .proto files exist), then runs buf generate
-task lint       # also lints proto files via buf lint
-task format     # also formats proto files via buf format
-```
-
-Generated files under `pkg/pb/` are gitignored build artifacts. Never edit them directly.
-
-If the project does not use gRPC, the `proto/` directory and `buf.gen.yaml` can be ignored entirely — nothing is wired into the server by default.
 
 ## Module Rename Helper
 

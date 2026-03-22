@@ -3,8 +3,6 @@
         "codezombiech.gitignore",
         "golang.go",
         "redhat.vscode-yaml",
-        "mikestead.dotenv",
-        "drblury.protobuf-vsc",
-        "bufbuild.vscode-buf"
+        "mikestead.dotenv"
     ]
 }
