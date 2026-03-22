@@ -127,7 +127,7 @@ Architecture notes, ADRs, evolution plans.
 
 **Shared kernel — code with zero dependencies on other internal layers.**
 
-Contains only interfaces, contracts, and primitives consumed by multiple layers. Nothing in `internal/common/` imports `model`, `service`, `repository`, `handler`, or `integration`.
+Contains only interfaces, contracts, and primitives consumed by multiple layers. Nothing in `internal/common/` imports `model`, `service`, `repository`, `handler`, or `integration`. External third-party packages (e.g. `zerolog`, `uuid`) may be imported freely — the restriction applies only to other internal packages.
 
 Subpackages:
 
