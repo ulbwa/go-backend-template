@@ -65,7 +65,7 @@ Application entry points only. `cmd/` does **not** wire dependencies — it dele
 
 - `cmd/<app>/main.go`
   - calls the entry-point function from `internal/di/`,
-  - starts the HTTP/gRPC server.
+  - starts the HTTP server.
 
 **FORBIDDEN:** business logic, domain invariants, storage/HTTP DTOs, direct dependency construction.
 
@@ -80,28 +80,13 @@ Database artifacts and migrations.
 - `db/migrations/` — SQL migrations (`-- migrate:up` / `-- migrate:down`).
 - `db/schema.sql` — current schema snapshot/base schema.
 
-### `proto/`
-
-Protocol Buffer source files (gRPC contract definitions).
-
-- `proto/<service>/v1/<service>.proto` — service and message definitions.
-- `proto/buf.yaml` — buf workspace configuration and lint ruleset.
-
-`proto/` is the **source of truth** for gRPC contracts. Never edit generated files under `pkg/pb/` directly — regenerate with `task generate`.
-
-### `buf.gen.yaml`
-
-buf code generation configuration at the project root. Uses remote plugins from `buf.build` (no local `protoc` or `protoc-gen-go` required) and maps proto sources to output directories under `pkg/pb/`.
-
 ### `pkg/`
 
 Exported packages that may be imported by external consumers (other services, clients).
 
-- `pkg/pb/<service>/v1/` — generated Go protobuf types (`*.pb.go`) and gRPC service stubs (`*_grpc.pb.go`). **Build artifact — do not edit.** Regenerate with `task generate`. The directory is tracked via `.gitkeep`; generated `.go` files are gitignored.
-
 ### `bin/`
 
-Local development tool binaries (for example: `golangci-lint`, `gofumpt`, `dbmate`, `buf`).
+Local development tool binaries (for example: `golangci-lint`, `gofumpt`, `dbmate`).
 
 ### `dist/`
 
@@ -149,7 +134,7 @@ Application configuration:
 
 - constructs infrastructure (DB pool, logger, config),
 - instantiates repositories, services, adapters, handlers,
-- assembles and returns the HTTP/gRPC server with registered routes.
+- assembles and returns the HTTP server with registered routes.
 
 `cmd/` only calls the entry-point function exported from this package.
 
@@ -235,7 +220,7 @@ Anti-Corruption Layer for external systems.
 
 ### `internal/handler/`
 
-Transport layer (HTTP/gRPC/consumer).
+Transport layer (HTTP/consumer).
 
 - `internal/handler/router.go` — route registration,
 - `internal/handler/<context>/handler.go` — handlers,
@@ -373,8 +358,8 @@ Direct `handler → read_repository` access is acceptable **only** when the quer
 
 - Declare sentinel errors in `internal/common/errors`.
 - Domain and services return business/domain errors.
-- Handlers map errors to proper HTTP/gRPC codes.
-- Unknown errors are returned as internal errors (`500` / `Internal`).
+- Handlers map errors to proper HTTP codes.
+- Unknown errors are returned as internal errors (`500`).
 - Use custom error types (structs implementing `error`) when the caller needs to inspect structured context beyond what a sentinel can convey (e.g., field name, status code, retry hint). Use `errors.As` to unwrap them; `errors.Is` is for sentinel equality only.
 - Apply graceful degradation for non-critical operations: when a secondary action fails (e.g., sending a notification, writing an audit log), log the error at `Warn` and continue rather than aborting the primary flow. Document explicitly why degradation is safe at that call site.
 
@@ -396,25 +381,6 @@ Direct `handler → read_repository` access is acceptable **only** when the quer
 3. Extend write repository if needed.
 4. Add handler + transport DTO.
 5. Register route/command handler.
-
-### New gRPC service
-
-gRPC is an optional transport. The toolchain is pre-configured; implement a service only when the project requires it.
-
-1. Define the service in `proto/<service>/v1/<service>.proto`.
-2. Run `task generate` — stubs are written to `pkg/pb/<service>/v1/`.
-3. Implement the generated `<Service>Server` interface in `internal/handler/<service>/grpc/handler.go`.
-4. Add request/response converters in `internal/handler/<service>/grpc/dto/` (proto types ↔ service DTOs).
-5. Register the service on a `grpc.Server` in `internal/di/`.
-6. Start the gRPC server in `cmd/`.
-
-**Never hand-edit files under `pkg/pb/`** — they are build artifacts. Always regenerate via `task generate`.
-
-gRPC handler layer conventions:
-
-- Handler struct embeds the generated `Unimplemented<Service>Server` for forward compatibility.
-- Handlers call service use-cases through the same port interfaces used by HTTP handlers.
-- Map domain errors to `status.Error(codes.*, ...)` in the handler, not in the service.
 
 ### New external integration
 
@@ -762,11 +728,11 @@ This applies to agents and developers equally. The Taskfile is the project's can
 
 | Operation | Command | When to run |
 | --- | --- | --- |
-| Format code | `task format` | After any Go or `.proto` file is modified |
-| Lint | `task lint` | After any Go or `.proto` file is modified |
+| Format code | `task format` | After any Go file is modified |
+| Lint | `task lint` | After any Go file is modified |
 | Run unit tests | `task test` | After any logic change |
 | Run e2e/integration tests | `task e2e_tests` | Before marking a task done |
-| Regenerate code | `task generate` | After any `.proto` file or `//go:generate` directive changes |
+| Regenerate code | `task generate` | After any `//go:generate` directive changes |
 | Create a migration | `task migration-new -- <name>` | When DB schema changes |
 | Apply migrations | `task migration-up` | After creating a migration |
 | Rollback migration | `task migration-down` | To verify reversibility |
@@ -779,15 +745,12 @@ Never run these directly instead of the corresponding `task` command:
 # FORBIDDEN — use task format instead
 gofumpt -w .
 goimports -w .
-buf format -w proto/
 
 # FORBIDDEN — use task lint instead
 golangci-lint run
-buf lint proto/
 
 # FORBIDDEN — use task generate instead
 go generate ./...
-buf generate
 
 # FORBIDDEN — use task test instead
 go test ./...

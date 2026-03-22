@@ -8,7 +8,6 @@ vars:
   GCI: "{{.BIN_DIR}}/gci"
   GOFUMPT: "{{.BIN_DIR}}/gofumpt"
   DBMATE: "{{.BIN_DIR}}/dbmate"
-  BUF: "{{.BIN_DIR}}/buf"
 
 tasks:
   install-formatters:
@@ -29,41 +28,16 @@ tasks:
       - test -x "{{.GCI}}"
       - test -x "{{.GOFUMPT}}"
 
-  install-buf:
-    desc: Install buf into {{.BIN_DIR}} (skipped when no .proto files are present)
-    cmds:
-      - |
-        if ! find proto -name '*.proto' 2>/dev/null | grep -q .; then
-          echo "[install-buf] no .proto files found, skipping"
-          exit 0
-        fi
-        [ -x {{.BUF}} ] || {
-          mkdir -p "{{.BIN_DIR}}"
-          echo "[install-buf] installing buf from go.mod tools"
-          GOBIN="{{.BIN_DIR}}" go install github.com/bufbuild/buf/cmd/buf
-          echo "[install-buf] installed: {{.BUF}}"
-        }
-    status:
-      # Consider done when: buf is already installed OR there are no proto files.
-      - test -x "{{.BUF}}" || ! find proto -name '*.proto' 2>/dev/null | grep -q .
-
   format:
-    desc: Run formatters gci and gofumpt using local binaries from {{.BIN_DIR}}; format proto files with buf
-    deps: [install-formatters, install-buf]
+    desc: Run formatters gci and gofumpt using local binaries from {{.BIN_DIR}}
+    deps: [install-formatters]
     cmds:
       - |
         echo "[format] running gofumpt"
-        find . -type f -name '*.go' -not -path './pkg/pb/*' -exec {{.GOFUMPT}} -extra -w {} +
+        find . -type f -name '*.go' -exec {{.GOFUMPT}} -extra -w {} +
       - |
         echo "[format] running gci"
-        find . -type f -name '*.go' -not -path './pkg/pb/*' -exec {{.GCI}} write -s standard -s default -s localmodule {} +
-      - |
-        if find proto -name '*.proto' 2>/dev/null | grep -q .; then
-          echo "[format] running buf format"
-          {{.BUF}} format -w proto/
-        else
-          echo "[format] no .proto files found, skipping buf format"
-        fi
+        find . -type f -name '*.go' -exec {{.GCI}} write -s standard -s default -s localmodule {} +
 
   install-golangci-lint:
     desc: Install golangci-lint into {{.BIN_DIR}}
@@ -79,19 +53,12 @@ tasks:
       - test -x "{{.GOLANGCI_LINT}}"
 
   lint:
-    desc: Run golangci-lint using local binary from {{.BIN_DIR}}; lint proto files with buf
-    deps: [install-golangci-lint, install-buf]
+    desc: Run golangci-lint using local binary from {{.BIN_DIR}}
+    deps: [install-golangci-lint]
     cmds:
       - |
         echo "[lint] running golangci-lint"
         {{.GOLANGCI_LINT}} run ./... --config .golangci.yml
-      - |
-        if find proto -name '*.proto' 2>/dev/null | grep -q .; then
-          echo "[lint] running buf lint"
-          {{.BUF}} lint proto/
-        else
-          echo "[lint] no .proto files found, skipping buf lint"
-        fi
 
   test:
     desc: Run Go tests
@@ -135,19 +102,12 @@ tasks:
       - test -x "{{.GO_ENUM}}"
 
   generate:
-    desc: Run code generation (go generate + buf generate for proto files)
-    deps: [install-go-enum, install-buf]
+    desc: Run code generation (go generate)
+    deps: [install-go-enum]
     cmds:
       - |
         echo "[generate] running go generate ./..."
         PATH="{{.BIN_DIR}}:$PATH" go generate ./...
-      - |
-        if find proto -name '*.proto' 2>/dev/null | grep -q .; then
-          echo "[generate] running buf generate"
-          PATH="{{.BIN_DIR}}:$PATH" {{.BUF}} generate
-        else
-          echo "[generate] no .proto files found, skipping buf generate"
-        fi
 
   install-dbmate:
     desc: Install dbmate into {{.BIN_DIR}}
